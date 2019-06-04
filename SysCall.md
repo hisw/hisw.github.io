@@ -1,0 +1,1 @@
+![调用一个系统调用](https://bbsmax.ikafan.com/static/L3Byb3h5L2h0dHAvaW1hZ2VzLmNuaXRibG9nLmNvbS9ibG9nMjAxNS83MzEyMDgvMjAxNTAzLzMwMDExOTI2MTU0NTc0Ny5wbmc=.jpg)

@@ -1,0 +1,61 @@
+<h1>Linux内核核心架构</h1>
+<p><img src="resources/kernel/architecture.jpg" alt="resource/architecture.JPG"></p>
+<h2>System call interface</h2>
+<p>对应用程序的API接口机制</p>
+<p>SCI是一个薄层，提供了从用户空间到内核执行函数调用的方法。 如前所述，即使在同一处理器系列中，此接口也可能依赖于体系结构。 SCI实际上是一种有趣的功能调用"多路复用和多路分解"服务。 您可以在./linux/kernel中找到SCI实现，也可以在./linux/arch中找到与体系结构相关的部分。</p>
+<p><img src="https://bbsmax.ikafan.com/static/L3Byb3h5L2h0dHAvaW1hZ2VzLmNuaXRibG9nLmNvbS9ibG9nMjAxNS83MzEyMDgvMjAxNTAzLzMwMDExOTI2MTU0NTc0Ny5wbmc=.jpg" alt="调用一个系统调用"></p>
+<blockquote>
+<p>应用程序调用API时在应用层执行“CPU提供的内核调用中断”从而切换运行环境到内核态。</p>
+</blockquote>
+<h2>Process/Threads</h2>
+<p>内核的核心，提供并行工作能力。</p>
+<p><img src="http://books.gigatux.nl/mirror/kerneldevelopment/0672327201/images/0672327201/graphics/04fig02.gif" alt="The Linux O(1) scheduler algorithm."></p>
+<p>在内核中，这些被称为线程，代表处理器的单独虚拟化（线程代码，数据，堆栈和CPU寄存器）。 在用户空间中，通常使用术语“进程”，尽管Linux实现不会将这两个概念（进程和线程）分开。</p>
+<p>内核实现了一种新颖的调度算法，该算法在恒定时间内运行，而不管争用CPU的线程数量。 这称为O（1）调度程序，表示调度一个线程所花费的时间与调度多个线程所花费的时间相同。</p>
+<h2>Memory Management</h2>
+<p>对内存进行管理：</p>
+<ol>
+<li>
+<p>分配/释放（对于大多数架构，内存被以4KB的页进行分割管理）</p>
+<p>内存管理不仅仅是管理4KB缓冲区。 Linux提供超过4KB缓冲区的抽象，例如slab分配器。 此内存管理方案使用4KB缓冲区作为其基础，但随后从内部分配结构，跟踪哪些页面已满，部分使用和空。 这允许该方案基于更大系统的需要动态地增长和缩小。</p>
+</li>
+<li>
+<p>通过MMU进行虚拟内存与物理内存的映射</p>
+<p><img src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b9999_10000&amp;sec=1541665863810&amp;di=e873afd52314308ca8abed2c818dc3e4&amp;imgtype=0&amp;src=http%3A%2F%2Fwww.eechina.com%2Fimage%2Ftech%2F2011032813570441.gif" alt="MMU地址翻译"></p>
+<p>现代操作系统使用虚拟地址进行寻址，MMU翻译虚拟地址并访问实际的物理地址。虚拟地址和物理地址的映射由内核管理,这样可以对物理地址进行保护。</p>
+</li>
+<li>
+<p>提供内存交换机制</p>
+<p>支持多个内存用户，有时可用内存耗尽。 因此，页面可以移出内存并移动到磁盘上，此过程称为交换，因为页面已从内存交换到硬盘上。 您可以在./linux/mm中找到内存管理源。</p>
+</li>
+</ol>
+<h2>Virtual file system</h2>
+<p>对应用程序提供树型接口机制，“一切皆文件”的核心。</p>
+<blockquote>
+<p>图：VFS在用户和“文件系统/内核功能"之间提供交换结构</p>
+</blockquote>
+<p><img src="https://www.ibm.com/developerworks/library/l-linux-kernel/figure4.jpg" alt="文件系统接口"></p>
+<blockquote>
+<p>在VFS的顶部是一组常见的API抽象函数，如open，close，read和write。 在VFS的底部是文件系统抽象，它定义了如何实现上层功能。 这些是给定文件系统的插件（其中存在超过50个），同时也为用户提供内核功能的抽象为"文件"的接口。 您可以在./linux/fs中找到文件系统源。</p>
+<p>文件系统层下面是缓冲区缓存，它为文件系统层提供了一组通用功能（独立于任何特定的文件系统）。 此缓存层通过将数据保持一小段时间（或推测性地预读，以便在需要时可用数据）来优化对物理设备的访问。 缓冲区高速缓存下面是设备驱动程序，它们实现特定物理设备的接口。</p>
+</blockquote>
+<h2>Device Drivers</h2>
+<p>内核同硬件的接口，内核提供设备驱动模型对设备驱动的关系进行组织。</p>
+<p><img src="https://i.imgur.com/e0jRwFL.jpg" alt="设备驱动模型"></p>
+<p>驱动依赖总线执行对设备的控制,设备依赖驱动来执行设备特有的控制。</p>
+<blockquote>
+<ul>
+<li>设备可通过中断控制器产生中断。</li>
+<li>驱动通过对设备地址的访问来执行对设备的驱动；</li>
+<li>设备地址分为物理地址和总线地址两种；</li>
+<li>通过总线地址访问设备的驱动依赖总结驱动提供的接口。</li>
+<li>类设备使用类子系统提供的类型功能。</li>
+</ul>
+</blockquote>
+<p>Linux内核中的绝大多数源代码存在于使特定硬件设备可用的设备驱动程序中。 Linux源代码树提供了一个驱动程序子目录，该子目录被所支持的各种设备进一步划分，例如蓝牙，I2C，串行等。 您可以在./linux/drivers中找到设备驱动程序源。</p>
+<h2>Network/Socket</h2>
+<p>Linux使用Socket提供网络/本地复杂IPC通信接口。</p>
+<p><img src="http://i.imgur.com/cqr4O2P.png" alt="tcp"></p>
+<p>这个一个TCP通信的过程。Linux使用fd(文件系统描述符)来绑定通信的本地网络地址，进行Socket操作，执行网络通信。</p>
+<p><img src="http://www.cs.columbia.edu/~jae/4118-LAST/L09/fig17.1.jpg" alt="Domain sockets"></p>
+<p>Local Domain Socket也叫本地IPC或Unix Socket, 使用一个文件系统路径名代替网络地址来标致进程地址。</p>
