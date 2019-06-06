@@ -1,3 +1,14 @@
+<html>
+<head>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script>
+        (adsbygoogle = window.adsbygoogle || []).push({
+        google_ad_client: "ca-pub-1724482933749702",
+        enable_page_level_ads: true
+        });
+    </script>
+</head>
+<body>
 # Linux内核核心架构 #
 ![resource/architecture.JPG](resources/kernel/architecture.jpg)
 ## System call interface ##
@@ -70,3 +81,5 @@ Linux使用Socket提供网络/本地复杂IPC通信接口。
 ![Domain sockets](http://www.cs.columbia.edu/~jae/4118-LAST/L09/fig17.1.jpg)
 
 Local Domain Socket也叫本地IPC或Unix Socket, 使用一个文件系统路径名代替网络地址来标致进程地址。
+</body>
+</html>
